@@ -10,6 +10,9 @@ import scipy.io.wavfile as wavfile
 import scipy.fftpack
 import numpy as np
 from matplotlib import pyplot as plt
+import scales
+
+# scales.generate_freq_table()
 
 fs, data = wavfile.read("input_records/Iza10.wav")
 # fs, data = wavfile.read('output_records/record.wav')

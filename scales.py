@@ -1,23 +1,41 @@
-from typing import Dict
+from typing import Dict, List
 
 """"
-
     Most popular scales for singing:
 
         C Major pentatonic (pentatonika C dur): C D E G A
-        D Major pentatonic (pentatonika D dur): D E F# A H
+        D Major pentatonic (pentatonika D dur): D E F# A B
         E Major pentatonic (pentatonika E dur): E F# G# B C#
 
     https://www.basicmusictheory.com/d-major-pentatonic-scale
-
 """
+
+C_Major_pentatonic = ["C", "D", "E", "G", "A"]
+D_Major_pentatonic = ["D", "E", "Fis", "A", "B"]
+E_Major_pentatonic = ["E", "Fis", "Gis", "B", "Cis"]
+
+def fit_frequencies(scale: List[str], note_frequencies: Dict) ->Dict:
+    """
+    Fit the frequencies of a given notes to the notes that belongs to a chosen scale.
+    """
+    result = {}
+    for note in scale:
+        for key in note_frequencies:
+            if note + "_" in key:
+                print(key)
+                result[key] = note_frequencies[key]
+        print()
+
+    # result = sorted(result.items(), key=lambda x: x[1])
+    print(result)
+    return(result)
+
 
 def generate_freq_table() ->Dict:
     """
     Generate the harmonics of 9 possible sets of notes ("octaves")
 
     https://pages.mtu.edu/~suits/notefreqs.html
-
     "Middle C" is C4
     """
     possible_notes = ["C", "Cis", "D", "Dis", "E", "F", "Fis", "G", "Gis", "A", "Ais", "B"]
@@ -42,34 +60,15 @@ def generate_freq_table() ->Dict:
 
         print()
         i += 1
+    print(notes)
+    notes = sorted(notes.items(), key=lambda x: x[1])
+    print(notes)
     return(notes)
 
-# # 1:
-# notes["C"] = 32.70
-# notes["C#"] = 34.65
-# notes["D"] = 36.71
-# notes["D#"] = 38.89
-# notes["E"] = 41.20
-# notes["F"] = 43.65
-# notes["F#"] = 46.25
-# notes["G"] = 49.00
-# notes["G#"] = 51.91
-# notes["A"] = 55.00
-# notes["A#"] = 58.27
-# notes["B"] = 61.74
-#
-# # 4 (middle):
-# notes["C_4"] = 261.6
-# notes["C#_4"] = 277.2
-# notes["D_4"] = 293.7
-# notes["D#_4"] = 311.1
-# notes["E_4"] = 329.6
-# notes["F_4"] = 349.2
-# notes["F#_4"] = 370.0
-# notes["G_4"] = 392.0
-# notes["G#_4"] = 415.3
-# notes["A_4"] = 440.0
-# notes["A#_4"] = 466.2
-# notes["B_4"] = 493.9
 
-generate_freq_table()
+def main():
+    frequencies = generate_freq_table()
+    fit_frequencies(E_Major_pentatonic, frequencies)
+
+if __name__ == "__main__":
+    main()
