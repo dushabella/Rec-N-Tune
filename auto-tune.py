@@ -1,5 +1,53 @@
-from pydub import AudioSegment
-from pydub.playback import play
+"""
+TODO:
+read, play, FFT,
+(divide)
+write
+"""
 
-sound = AudioSegment.from_wav('myfile.wav')
-play(sound)
+from __future__ import print_function
+import scipy.io.wavfile as wavfile
+import scipy.fftpack
+import numpy as np
+from matplotlib import pyplot as plt
+
+fs, data = wavfile.read("input_records/Iza10.wav")
+# fs, data = wavfile.read('output_records/record.wav')
+
+print("Sample rate: ", fs)
+l_audio = len(data.shape)
+print("Channels:", l_audio)
+if l_audio == 2:
+    data = data.sum(axis=1) / 2
+N = data.shape[0]
+print ("Complete Samplings N", N)
+secs = N / float(fs)
+print ("secs", secs)
+Ts = 1.0/fs # sampling interval in time
+print ("Timestep between samples Ts", Ts)
+t = scipy.arange(0, secs, Ts) # time vector as scipy arange field / numpy.ndarray
+FFT = abs(scipy.fft(data))
+FFT_side = FFT[range(N//2)] # one side FFT range
+freqs = scipy.fftpack.fftfreq(data.size, t[1]-t[0])
+fft_freqs = np.array(freqs)
+freqs_side = freqs[range(N//2)] # one side frequency range
+fft_freqs_side = np.array(freqs_side)
+
+plt.subplot(311)
+p1 = plt.plot(t, data, "g") # plotting the signal
+plt.xlabel('Time')
+plt.ylabel('Amplitude')
+
+# plt.subplot(312)
+# p2 = plt.plot(freqs, FFT, "r") # plotting the complete fft spectrum
+# plt.xlabel('Frequency (Hz)')
+# plt.ylabel('Count dbl-sided')
+
+plt.subplot(312)
+p3 = plt.plot(freqs_side, abs(FFT_side), "b") # plotting the positive fft spectrum
+plt.xlabel('Frequency (Hz)')
+plt.ylabel('Count single-sided')
+plt.show()
+
+# how to generate audio from numpy array:
+# https://stackoverflow.com/questions/10357992/how-to-generate-audio-from-a-numpy-array
