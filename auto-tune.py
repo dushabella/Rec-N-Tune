@@ -33,20 +33,21 @@ fft_freqs = np.array(freqs)
 freqs_side = freqs[range(N//2)] # one side frequency range
 fft_freqs_side = np.array(freqs_side)
 
-plt.subplot(311)
-p1 = plt.plot(t, data, "g") # plotting the signal
+
+fig = plt.figure(figsize=[10, 7])
+gray = '#57506D'
+
+plt.subplot(2, 1, 1)
+plt.plot(t, data, gray) # plotting the signal
 plt.xlabel('Time')
 plt.ylabel('Amplitude')
 
-# plt.subplot(312)
-# p2 = plt.plot(freqs, FFT, "r") # plotting the complete fft spectrum
-# plt.xlabel('Frequency (Hz)')
-# plt.ylabel('Count dbl-sided')
-
-plt.subplot(312)
-p3 = plt.plot(freqs_side, abs(FFT_side), "b") # plotting the positive fft spectrum
+plt.subplot(2, 1, 2)
+p3 = plt.plot(freqs_side, abs(FFT_side), gray) # plotting the positive fft spectrum
 plt.xlabel('Frequency (Hz)')
 plt.ylabel('Count single-sided')
+
+
 plt.show()
 
 # how to generate audio from numpy array:
