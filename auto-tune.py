@@ -36,47 +36,101 @@ def read_wav(file_name: str):
     Ts = 1.0 / fs  # sampling interval
     print("Timestep between samples: ", Ts)
 
-    return fs, data, N, secs, Ts
+    t = scipy.arange(0, secs, Ts)  # time vector as scipy arange field / numpy.ndarray
 
-fs, data, N, secs, Ts = read_wav("input_records/Iza10.wav")
-# fs, data, N, secs, Ts = read_wav("output_records/record.wav")
+    return fs, data, N, secs, Ts, t
 
 
-t = scipy.arange(0, secs, Ts) # time vector as scipy arange field / numpy.ndarray
+def FFT_quarter(data, N: int, t):
+    """
+    Do Fast Fourier Transform on the signal to change the time domain to frequency domain.
+    Then, take the proper data for the further operations (that are not, let's say, "redundant")
+    :param data: signal data
+    :param N: number of data samples
+    :return:
+    """
+    FFT = abs(scipy.fft(data))
+    print("FFT: ", FFT)
+    FFT_side = FFT[range(N//2)] # one side FFT range
+    freqs = scipy.fftpack.fftfreq(N, t[1]-t[0])
+    print("freqs: ", freqs)
+    freqs_side = freqs[range(N//2)] # one side frequency range
+    # fft_freqs_side = np.array(freqs_side)
 
-FFT = abs(scipy.fft(data))
-print("FFT: ", FFT)
+    return FFT, FFT_side, freqs, freqs_side
 
-FFT_side = FFT[range(N//2)] # one side FFT range
-freqs = scipy.fftpack.fftfreq(N, t[1]-t[0])
-fft_freqs = np.array(freqs)
-freqs_side = freqs[range(N//2)] # one side frequency range
-fft_freqs_side = np.array(freqs_side)
-
-fig = plt.figure(figsize=[10, 7])
-gray = '#57506D'
-
-plt.subplot(2, 1, 1)
-plt.plot(t, data, gray) # plotting the signal
-plt.xlabel('Time')
-plt.ylabel('Amplitude')
-
-plt.subplot(2, 1, 2)
-p2 = plt.plot(freqs, FFT, "r") # plotting the complete fft spectrum
-plt.xlabel('Frequency (Hz)')
-plt.ylabel('Count dbl-sided')
-
-# plt.subplot(2, 1, 2)
-# p3 = plt.plot(freqs_side, abs(FFT_side), gray) # plotting the positive fft spectrum
-# plt.xlabel('Frequency (Hz)')
-# plt.ylabel('Count single-sided')
-
-plt.show()
-
-def main():
+def frequency_table(sample_len):
+    """
+    Returns a numpy table of frequencies of the notes
+    :param freq_len: amount of frequency samples of recording
+    :return: a table of a type 'numpy.ndarray'
+    """
     E_Major_pentatonic = ["E", "Fis", "Gis", "B", "Cis"]
     frequencies = scales.generate_freq_table()
-    scales.fit_frequencies(E_Major_pentatonic, frequencies)
+    frequencies_of_scale = scales.fit_frequencies(E_Major_pentatonic, frequencies)
+
+    frequencies = sorted(frequencies.items(), key=lambda x: x[1])
+    max_frequency = int(frequencies[-1][1])
+    # print("last:", frequencies[-1][1])
+
+    frequencies_of_scale = sorted(frequencies_of_scale.items(), key=lambda x: x[1])  # sort ->list
+
+    res = np.zeros(sample_len)
+    print(res)
+    for element in frequencies_of_scale:
+        el = int(element[1])
+        el = int(el * sample_len / max_frequency - 1)
+        print(el)
+        res[el] = 1
+    print(res)
+    return res
+
+
+def draw(t, data, FFT, FFT_side, freqs, freqs_side, freq_of_notes):
+    fig = plt.figure(figsize=[10, 7])
+    gray = '#57506D'
+    yellow = "#FFC726"
+
+    plt.subplot(2, 1, 1)
+    plt.plot(t, data, gray) # plotting the signal
+    plt.xlabel('Time')
+    plt.ylabel('Amplitude')
+
+    # plt.subplot(2, 1, 2)
+    # plt.plot(t, freqs, "g") # plotting the signal
+    # plt.xlabel('Time')
+    # plt.ylabel('Frequency (Hz)')
+
+    # plt.subplot(2, 1, 2)
+    # p2 = plt.plot(freqs, FFT, "r") # plotting the complete fft spectrum
+    # plt.xlabel('Frequency (Hz)')
+    # plt.ylabel('Count dbl-sided')
+
+    plt.subplot(2, 1, 2)
+    p3 = plt.plot(freqs_side, abs(FFT_side), gray, label = "recorded") # plotting the positive fft spectrum
+    gain = np.max(abs(FFT_side))
+    print(abs(FFT_side))
+    p4 = plt.plot(freqs_side, freq_of_notes*gain/10, yellow, label="Notes") # the plot shows where are the notes
+    print( "fr_size", freqs_side.shape)
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('Count single-sided')
+
+    plt.show()
+
+def main():
+    fs, data, N, secs, Ts, t = read_wav("input_records/Iza10.wav")
+    # fs, data, N, secs, Ts, t = read_wav("output_records/record.wav")
+
+    FFT, FFT_side, freqs, freqs_side = FFT_quarter(data, N, t)
+
+    samples = abs(FFT_side).shape
+    samples = str(samples)
+    samples = samples[1:-2]
+    samples = int(samples)
+    print(samples)
+    freq_of_notes = frequency_table(samples)
+
+    draw(t, data, FFT, FFT_side, freqs, freqs_side, freq_of_notes)
 
 if __name__ == "__main__":
     main()
