@@ -22,14 +22,12 @@ def fit_frequencies(scale: List[str], note_frequencies: Dict) ->Dict:
     for note in scale:
         for key in note_frequencies:
             if note + "_" in key:
-                print(key)
+                # print(key)
                 result[key] = note_frequencies[key]
         print()
 
-    # result = sorted(result.items(), key=lambda x: x[1])
-    print(result)
+    # result = sorted(result.items(), key=lambda x: x[1]) #sort ->list
     return(result)
-
 
 def generate_freq_table() ->Dict:
     """
@@ -54,15 +52,14 @@ def generate_freq_table() ->Dict:
                 notes[note_hlpr] = temp_freq[k] * 2
             temp_freq[k] = notes[note_hlpr]
 
-            print(note_hlpr + ": ", end=" ")
-            print(notes[note_hlpr])
+            # print(note_hlpr + ": ", end=" ")
+            # print(notes[note_hlpr])
             k+=1
 
         print()
         i += 1
-    print(notes)
-    notes = sorted(notes.items(), key=lambda x: x[1])
-    print(notes)
+    # notes = sorted(notes.items(), key=lambda x: x[1])
+    # print(notes)
     return(notes)
 
 
