@@ -1,14 +1,21 @@
+"""
+Author: Izabela Dusza
+Created on January 2020
+
+    Record .wav file
+
+"""
+
 import sounddevice as sd
 from scipy.io.wavfile import write
 
 def record(fs: int, seconds: float, name: str) ->None:
     """
-    Record and save the sound.
+    Record the sound and save it in a .wav file.
 
-    Function parameters:
-        fs - Sample rate
-        seconds - Duration of recording
-        name - Name of output record
+    :param fs: Sample rate
+    :param seconds: Duration of recording
+    :param name: Name of output record
     """
     myrecording = sd.rec(int(seconds * fs), samplerate=fs, channels=2)
     print("Recording...")
@@ -16,8 +23,11 @@ def record(fs: int, seconds: float, name: str) ->None:
     print("Record is finished")
     write('output_records/' + name + '.wav', fs, myrecording)  # Save as WAV file
 
-fs = 44100  # Sample rate
-seconds = 3  # Duration of recording
+def main():
+    fs = 44100  # Sample rate
+    seconds = 3  # Duration of recording
 
-record(fs, seconds, "record")
+    record(fs, seconds, "record")
 
+if __name__ == "__main__":
+    main()

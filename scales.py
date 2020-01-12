@@ -1,7 +1,11 @@
-from typing import Dict, List
+"""
+Author: Izabela Dusza
+Created on January 2020
 
-""""
-    Most popular scales for singing:
+    This script generates the frequencies of a given scale.
+    Each scale contains of some notes. Any note has a fundamental frequency and its multifications.
+    
+    Exemplary scales (for singing):
 
         C Major pentatonic (pentatonika C dur): C D E G A
         D Major pentatonic (pentatonika D dur): D E F# A B
@@ -10,6 +14,9 @@ from typing import Dict, List
     https://www.basicmusictheory.com/d-major-pentatonic-scale
 """
 
+from typing import Dict, List
+
+# here are defined exemplary scales
 C_Major_pentatonic = ["C", "D", "E", "G", "A"]
 D_Major_pentatonic = ["D", "E", "Fis", "A", "B"]
 E_Major_pentatonic = ["E", "Fis", "Gis", "B", "Cis"]
