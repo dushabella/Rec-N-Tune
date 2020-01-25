@@ -16,10 +16,7 @@ def correct(in_wave, sample_r: int, scale: List[float]): #->
     :return:
     """
     step = int(sample_r / 10)
-    print(type(in_wave))
-    print(type(sample_r))
-    print(type(scale))
-    print('Detected fq\tCorrected fq\tCorrection factor')
+    print('Detected fq\t Corrected fq\t Correction factor')
     print('--------------------------------------------')
     for x in range(0, len(in_wave), step):
         # find STFT
@@ -32,11 +29,11 @@ def correct(in_wave, sample_r: int, scale: List[float]): #->
         f = __find_stft(y, sample_r)
         print("f:", f)
 
-    #     diff_array = [np.abs(note - f) for note in NOTES]
-    #     note = np.argmin(diff_array)
-    #     print(f, end='\t')
-    #     print(NOTES[note], end='\t')
-    #
+        diff_array = [np.abs(note - f) for note in scale]
+        note = np.argmin(diff_array)
+        print(f, end='\t')
+        print(scale[note], end='\t')
+
     #     OUTPUT_WAVE[x:x + step] = _transpose(y, f, NOTES[note])
     #     # self.OUTPUT_WAVE = np.concatenate(self.OUTPUT_WAVE,self._transpose(y, f, self.NOTES[note]))
     #
