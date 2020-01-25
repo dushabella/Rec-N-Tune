@@ -20,6 +20,7 @@ from typing import Dict, List
 C_Major_pentatonic = ["C", "D", "E", "G", "A"]
 D_Major_pentatonic = ["D", "E", "Fis", "A", "B"]
 E_Major_pentatonic = ["E", "Fis", "Gis", "B", "Cis"]
+full_scale = ["C", "Cis", "D", "Dis", "E", "F", "Fis", "G", "Gis", "A", "Ais", "B"]
 
 def fit_frequencies(scale: List[str]) ->Dict:
     """
@@ -61,8 +62,8 @@ def __generate_freq_table() ->Dict:
                 notes[note_hlpr] = temp_freq[k] * 2
             temp_freq[k] = notes[note_hlpr]
 
-            # print(note_hlpr + ": ", end=" ")
-            # print(notes[note_hlpr])
+            print(note_hlpr + ": ", end=" ")
+            print(notes[note_hlpr])
             k+=1
 
         print()

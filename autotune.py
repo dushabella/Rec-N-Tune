@@ -1,6 +1,7 @@
 import librosa
 import scales
 import numpy as np
+import math
 from typing import List
 
 
@@ -13,45 +14,31 @@ def correct(in_wave, sample_r: int, scale: List[float]): #->
     :param in_wave: input wave [numpy.darray]
     :param sample_r: sample rate
     :param scale: scale/set of notes
-    :return:
+    :return: output wave
     """
     step = int(sample_r / 10)
-    print('Detected fq\t Corrected fq\t Correction factor')
-    print('--------------------------------------------')
+    print('Detected frequency \t | \t Closest frequency \t | \t Correction')
     for x in range(0, len(in_wave), step):
+
         # find STFT
-        # Match to closest frequency
-        # transpose
-        # Append to self.OUTPUT_WAVE
-        # Return output wave
-
         y = in_wave[x:x + step]
-        f = __find_stft(y, sample_r)
-        print("f:", f)
+        f = _find_stft(y, sample_r)
+        print("f:", f, end='\t')
 
+        # create the array of differences between "almost note" and "note" \
+        # and match to closest frequency
         diff_array = [np.abs(note - f) for note in scale]
         note = np.argmin(diff_array)
-        print(f, end='\t')
         print(scale[note], end='\t')
 
-    #     OUTPUT_WAVE[x:x + step] = _transpose(y, f, NOTES[note])
-    #     # self.OUTPUT_WAVE = np.concatenate(self.OUTPUT_WAVE,self._transpose(y, f, self.NOTES[note]))
-    #
-    # print('-------------------------------------------')
-    # return librosa.util.normalize(OUTPUT_WAVE)
+        # shift
+        out_wave = np.empty(shape=in_wave.shape)
+        out_wave[x:x + step] = _shift(y, sr, f, scale[note])
+
+    return librosa.util.normalize(out_wave)
 
 
-# self.INPUT_WAVE = y
-# self.INPUT_SR = sr
-# self.SCALE = scale
-# self._note = Notes.Notes(scale)
-#
-# self.NOTES = self._note.getScale()
-# self.OUTPUT_WAVE = np.empty(shape=self.INPUT_WAVE.shape)
-
-
-
-def __find_stft(y, sr: int) ->float:
+def _find_stft(y, sr: int) ->float:
     """
     Finds STFT (Short Time Fourier Transform).
 
@@ -67,15 +54,61 @@ def __find_stft(y, sr: int) ->float:
     return fq
 
 
-# y, sr = librosa.load("input_records/Iza10.wav")
-y, sr = librosa.load("output_records/synth.wav")
+def _shift(y, sr: int, f0: float, f: float):
+    """
+    Shift the signal
+    :param y: data [numpy.darray]
+    :param sr: sample rate
+    :param f0: old frequency
+    :param f: new frequency
+    :return:
+    """
+    # Calculate the steps to be shifted based on the old and new frequencies
+    steps, st = _getStep(f0, f)
+    print(steps, st)
+    yT = librosa.effects.pitch_shift(y, sr, steps)
 
-C_Major = scales.C_Major_pentatonic
-scale_dict = scales.fit_frequencies(C_Major)
+    return yT
+
+
+def _getStep(f0: float, f: float):
+    """
+    Counts steps for shifting
+    https://en.wikipedia.org/wiki/Semitone
+    https://pl.wikipedia.org/wiki/P%C3%B3%C5%82ton
+
+    WARNING:
+    Step that is a result of this function, is correct only for full scale of notes.
+    If you want to auto-tune it for a particular scale, e.g. C_Major_pentatonic,
+    you have to do a special function for it.
+
+    :param f0: old frequency
+    :param f: new frequency
+    :return: How many (fractional) half-steps to shift y
+    """
+    semitones = 12 # number of semitones in octave
+    if int(f0) == 0:
+        return f0
+    res = semitones * math.log(f / f0, 2)
+
+    return res, res2
+
+
+# y, sr = librosa.load("input_records/Iza10.wav")
+y, sr = librosa.load("input_records/Alvaro1.wav")
+# y, sr = librosa.load("output_records/synth.wav")
+
+chosen_scale = scales.full_scale
+scale_dict = scales.fit_frequencies(chosen_scale)
 
 scale = [scale_dict[note] for note in scale_dict]
 scale.sort()
 print(scale)
-scale.sort()
 
-correct(y, sr, scale)
+corrected_y = correct(y, sr, scale)
+
+
+def save_wav(file_name, n_arr, sr):
+    librosa.output.write_wav(file_name, n_arr, sr)
+
+save_wav("records/corrected_alvaro.wav", corrected_y, sr)
