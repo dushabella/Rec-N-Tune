@@ -22,6 +22,6 @@ player.play_wave(synthesizer.generate_chord(chord, 2.0))
 # write
 writer = Writer()
 
-chord = [270.000,  329.628, 370.000]
+chord = [170.000,  329.628, 570.000]
 wave = synthesizer.generate_chord(chord, 3.0)
-writer.write_wave("output_records/your.wav", wave)
+writer.write_wave("output_records/synth.wav", wave)
