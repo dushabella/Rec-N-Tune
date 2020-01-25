@@ -21,22 +21,24 @@ C_Major_pentatonic = ["C", "D", "E", "G", "A"]
 D_Major_pentatonic = ["D", "E", "Fis", "A", "B"]
 E_Major_pentatonic = ["E", "Fis", "Gis", "B", "Cis"]
 
-def fit_frequencies(scale: List[str], note_frequencies: Dict) ->Dict:
+def fit_frequencies(scale: List[str]) ->Dict:
     """
     Fit the frequencies of a given notes to the notes that belongs to a chosen scale.
     """
+
+    note_frequencies = __generate_freq_table()
+
     result = {}
     for note in scale:
         for key in note_frequencies:
             if note + "_" in key:
                 # print(key)
                 result[key] = note_frequencies[key]
-        print()
 
     # result = sorted(result.items(), key=lambda x: x[1]) #sort ->list
     return(result)
 
-def generate_freq_table() ->Dict:
+def __generate_freq_table() ->Dict:
     """
     Generate the harmonics of 9 possible sets of notes ("octaves")
 
@@ -66,13 +68,13 @@ def generate_freq_table() ->Dict:
         print()
         i += 1
     # notes = sorted(notes.items(), key=lambda x: x[1])
+    # print(sorted(notes.items(), key=lambda x: x[1]))
     # print(notes)
     return(notes)
 
 
 def main():
-    frequencies = generate_freq_table()
-    fit_frequencies(E_Major_pentatonic, frequencies)
+    fit_frequencies(C_Major_pentatonic)
 
 if __name__ == "__main__":
     main()

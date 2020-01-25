@@ -94,15 +94,17 @@ def frequency_table(sample_len):
     :param freq_len: amount of frequency samples of recording
     :return res: frequency table of a type 'numpy.ndarray'
     """
-    E_Major_pentatonic = ["E", "Fis", "Gis", "B", "Cis"]
-    frequencies = scales.generate_freq_table()
-    frequencies_of_scale = scales.fit_frequencies(E_Major_pentatonic, frequencies)
 
-    frequencies = sorted(frequencies.items(), key=lambda x: x[1])
-    max_frequency = int(frequencies[-1][1])
-    # print("last:", frequencies[-1][1])
+    E_Major = scales.E_Major_pentatonic
+    C_Major = scales.C_Major_pentatonic
+    frequencies_of_scale = scales.fit_frequencies(C_Major)
 
-    frequencies_of_scale = sorted(frequencies_of_scale.items(), key=lambda x: x[1])  # sort ->list
+
+    frequencies_of_scale = sorted(frequencies_of_scale.items(), key=lambda x: x[1])
+    max_frequency = int(frequencies_of_scale[-1][1])
+    print("Choosen scale:", frequencies_of_scale)
+
+    # frequencies_of_scale = sorted(frequencies_of_scale.items(), key=lambda x: x[1])  # sort ->list
 
     res = np.zeros(sample_len)
     for element in frequencies_of_scale:
@@ -111,16 +113,12 @@ def frequency_table(sample_len):
         res[el] = 1
     return res
 
-def reconstruct_sound():
-    print("chora")
-    tx = np.fft.fft(a)
-    itx = np.fft.ifft(tx)
-
 
 def draw(t, data, FFT, FFT_side, freqs, freqs_side, freq_of_notes):
     fig = plt.figure(figsize=[10, 7])
     gray = '#57506D'
     yellow = "#FFC726"
+    caribbean = '#00C47F'
 
     plt.subplot(2, 1, 1)
     plt.plot(t, data, gray) # plotting the signal
@@ -141,27 +139,8 @@ def draw(t, data, FFT, FFT_side, freqs, freqs_side, freq_of_notes):
     plt.subplot(2, 1, 2)
     p3 = plt.plot(freqs_side, abs(FFT_side), gray, label = "recorded") # plotting the positive fft spectrum
     gain = np.max(abs(FFT_side))
-    print(abs(FFT_side))
-    p4 = plt.plot(freqs_side, freq_of_notes*gain/10, yellow, label="Notes") # the plot shows where are the notes
+    p4 = plt.plot(freqs_side, freq_of_notes*gain/10, yellow, label="Notes") # showing where are the notes
     print( "fr_size", freqs_side.shape)
-    plt.xlabel('Frequency (Hz)')
-    plt.ylabel('Count single-sided')
-
-    plt.show()
-
-def detectPitch(fs: int, signal):
-    """
-    Detects pitches in frequency domain signal, using autocorelation tool
-
-    :param fs: sampling frequency
-    :param signal: (type of numpy.ndarray) the array which is a "single - sided" frequency representation of a sound
-            "single sided" means only a quarter part of a full set of frequencies which you can obtain with FFT
-    """
-
-    # input signal visualization
-    caribbean = '#00C47F'
-
-    p3 = plt.plot(signal, caribbean, label = "recorded") # plotting the positive fft spectrum
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('Count single-sided')
 
@@ -169,8 +148,8 @@ def detectPitch(fs: int, signal):
 
 
 def main():
-    fs, data, N, secs, Ts, t = read_wav("input_records/Iza10.wav")
-    # fs, data, N, secs, Ts, t = read_wav("output_records/record.wav")
+    # fs, data, N, secs, Ts, t = read_wav("input_records/Iza10.wav")
+    fs, data, N, secs, Ts, t = read_wav("output_records/synth.wav")
 
     FFT, FFT_side, freqs, freqs_side = FFT_quarter(data, N, t)
 
@@ -178,13 +157,10 @@ def main():
     samples = str(samples)
     samples = samples[1:-2]
     samples = int(samples)
-    print(samples)
+    # print(samples)
     freq_of_notes = frequency_table(samples)
 
-    signal = abs(FFT_side)
-    detectPitch(fs, signal)
-
-    # draw(t, data, FFT, FFT_side, freqs, freqs_side, freq_of_notes)
+    draw(t, data, FFT, FFT_side, freqs, freqs_side, freq_of_notes)
 
 if __name__ == "__main__":
     main()
