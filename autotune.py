@@ -1,11 +1,11 @@
 import librosa
-import scales
 import numpy as np
 import math
+import scales
 from typing import List
 
 
-def correct(in_wave, sample_r: int, scale: List[float]): #->
+def correct(in_wave, sample_r: int, scale: List[float]):
     """
     Takes chunks of signal of a length "step",
     detects pitches with STFT,
@@ -17,7 +17,10 @@ def correct(in_wave, sample_r: int, scale: List[float]): #->
     :return: output wave
     """
     step = int(sample_r / 10)
+    print(in_wave)
+    print('__________________________________________________________________')
     print('Detected frequency \t | \t Closest frequency \t | \t Correction')
+    print('__________________________________________________________________')
     for x in range(0, len(in_wave), step):
 
         # find STFT
@@ -33,7 +36,7 @@ def correct(in_wave, sample_r: int, scale: List[float]): #->
 
         # shift
         out_wave = np.empty(shape=in_wave.shape)
-        out_wave[x:x + step] = _shift(y, sr, f, scale[note])
+        out_wave[x:x + step] = _shift(y, sample_r, f, scale[note])
 
     return librosa.util.normalize(out_wave)
 
@@ -64,51 +67,55 @@ def _shift(y, sr: int, f0: float, f: float):
     :return:
     """
     # Calculate the steps to be shifted based on the old and new frequencies
-    steps, st = _getStep(f0, f)
-    print(steps, st)
+    steps = _step(f0, f)
+    print(steps)
     yT = librosa.effects.pitch_shift(y, sr, steps)
 
     return yT
 
 
-def _getStep(f0: float, f: float):
+def _step(f0: float, f: float):
     """
     Counts steps for shifting
     https://en.wikipedia.org/wiki/Semitone
     https://pl.wikipedia.org/wiki/P%C3%B3%C5%82ton
-
-    WARNING:
-    Step that is a result of this function, is correct only for full scale of notes.
-    If you want to auto-tune it for a particular scale, e.g. C_Major_pentatonic,
-    you have to do a special function for it.
 
     :param f0: old frequency
     :param f: new frequency
     :return: How many (fractional) half-steps to shift y
     """
     semitones = 12 # number of semitones in octave
+
     if int(f0) == 0:
         return f0
     res = semitones * math.log(f / f0, 2)
 
-    return res, res2
+    # base = math.pow(2, 1.0 / semitones)
+    # if int(f0) == 0:
+    #     return f0
+    # res = math.log(f / f0, base)
+
+    return res
 
 
-# y, sr = librosa.load("input_records/Iza10.wav")
-y, sr = librosa.load("input_records/Alvaro1.wav")
-# y, sr = librosa.load("output_records/synth.wav")
+def save_wav(file_name: str, signal, sr: int):
+    librosa.output.write_wav(file_name, signal, sr)
 
-chosen_scale = scales.full_scale
-scale_dict = scales.fit_frequencies(chosen_scale)
+def main():
+    y, sr = librosa.load("song_records/Alvaro1.wav")
+    # y, sr = librosa.load("records/synth.wav")
 
-scale = [scale_dict[note] for note in scale_dict]
-scale.sort()
-print(scale)
+    chosen_scale = scales.C_Major_pentatonic
+    scale_dict = scales.fit_frequencies(chosen_scale)
 
-corrected_y = correct(y, sr, scale)
+    scale = [scale_dict[note] for note in scale_dict]
+    scale.sort()
+    print(scale)
 
+    corrected_y = correct(y, sr, scale)
 
-def save_wav(file_name, n_arr, sr):
-    librosa.output.write_wav(file_name, n_arr, sr)
+    save_wav("records/corrected_alvaro.wav", corrected_y, sr)
+    # save_wav("records/corrected_synth.wav", corrected_y, sr)
 
-save_wav("records/corrected_alvaro.wav", corrected_y, sr)
+if __name__ == "__main__":
+    main()

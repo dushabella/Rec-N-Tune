@@ -21,7 +21,7 @@ def record(fs: int, seconds: float, name: str) ->None:
     print("Recording...")
     sd.wait()  # Wait until recording is finished
     print("Record is finished")
-    write('output_records/' + name + '.wav', fs, myrecording)  # Save as WAV file
+    write('records/' + name + '.wav', fs, myrecording)  # Save as WAV file
 
 def main():
     fs = 44100  # Sample rate

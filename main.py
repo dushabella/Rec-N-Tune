@@ -4,16 +4,19 @@ Created on January 2020
 
     Auto-tune style project for CBSP course.
 
-    Load, record and play .wav file.
+    Load, record and visualize .wav file.
     Tune the notes of a recorded file.
+
 
 """
 
 import scipy.io.wavfile as wavfile
 import scipy.fftpack
-import numpy as np
 from matplotlib import pyplot as plt
 import scales
+import autotune
+import librosa
+
 
 
 def read_wav(file_name: str):
@@ -55,49 +58,21 @@ def read_wav(file_name: str):
 
 def FFT_quarter(data, N: int, t):
     """
-    Does Fast Fourier Transform on the signal to change the time domain to frequency domain.
+    Makes Fast Fourier Transform on the signal to change the time domain to frequency domain.
     Then, takes the proper data for the further operations (that are not, let's say, "redundant")
     :param data: signal data
     :param N: number of data samples
     :return:
     """
-    FFT = scipy.fft(data) #abs(scipy.fft(data))
-    print("FFT: ", FFT)
+    FFT = scipy.fft(data)
     FFT_side = FFT[range(N//2)] # one side FFT range
     freqs = scipy.fftpack.fftfreq(N, t[1]-t[0])
-    print("freqs: ", freqs)
     freqs_side = freqs[range(N//2)] # one side frequency range
-    # fft_freqs_side = np.array(freqs_side)
 
     return FFT, FFT_side, freqs, freqs_side
 
-def frequency_table(sample_len):
-    """
-    Returns a numpy array that represents a frequencies of the notes
-    :param freq_len: amount of frequency samples of recording
-    :return res: frequency table of a type 'numpy.ndarray'
-    """
 
-    E_Major = scales.E_Major_pentatonic
-    C_Major = scales.C_Major_pentatonic
-    frequencies_of_scale = scales.fit_frequencies(C_Major)
-
-
-    frequencies_of_scale = sorted(frequencies_of_scale.items(), key=lambda x: x[1])
-    max_frequency = int(frequencies_of_scale[-1][1])
-    print("Choosen scale:", frequencies_of_scale)
-
-    # frequencies_of_scale = sorted(frequencies_of_scale.items(), key=lambda x: x[1])  # sort ->list
-
-    res = np.zeros(sample_len)
-    for element in frequencies_of_scale:
-        el = int(element[1])
-        el = int(el * sample_len / max_frequency - 1)
-        res[el] = 1
-    return res
-
-
-def draw(t, data, FFT, FFT_side, freqs, freqs_side, freq_of_notes):
+def draw(t, data, FFT, FFT_side, freqs, freqs_side, freqs_side_scale, FFT_side_scale):
     fig = plt.figure(figsize=[10, 7])
     gray = '#57506D'
     yellow = "#FFC726"
@@ -112,7 +87,7 @@ def draw(t, data, FFT, FFT_side, freqs, freqs_side, freq_of_notes):
     # plt.plot(t, freqs, "g") # plotting the signal
     # plt.xlabel('Time')
     # plt.ylabel('Frequency (Hz)')
-
+    #
     # plt.subplot(2, 1, 2)
     # FFT = abs(FFT)
     # p2 = plt.plot(freqs, FFT, "r") # plotting the complete fft spectrum
@@ -120,10 +95,8 @@ def draw(t, data, FFT, FFT_side, freqs, freqs_side, freq_of_notes):
     # plt.ylabel('Count dbl-sided')
 
     plt.subplot(2, 1, 2)
-    p3 = plt.plot(freqs_side, abs(FFT_side), gray, label = "recorded") # plotting the positive fft spectrum
-    gain = np.max(abs(FFT_side))
-    p4 = plt.plot(freqs_side, freq_of_notes*gain/10, yellow, label="Notes") # showing where are the notes
-    print( "fr_size", freqs_side.shape)
+    p3 = plt.plot(freqs_side_scale, abs(FFT_side_scale), yellow, label="Notes") # showing where are the notes
+    p4 = plt.plot(freqs_side, abs(FFT_side), gray, label="recorded") # plotting the positive fft spectrum
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('Count single-sided')
 
@@ -131,21 +104,52 @@ def draw(t, data, FFT, FFT_side, freqs, freqs_side, freq_of_notes):
 
 
 def main():
-    # fs, data, N, secs, Ts, t = read_wav("input_records/Iza10.wav")
-    fs, data, N, secs, Ts, t = read_wav("output_records/synth.wav")
+    # _________________________________PARAMETERS__________________________________
 
+    # NAME OF A FILE YOU WANT TO TUNE
+    # input_filename = "song_records/Alvaro1.wav" # NAME OF A FILE YOU WANT TO TUNE
+    input_filename = "records/synth.wav"
+
+    # output_filename = "records/corrected_alvaro.wav"
+    output_filename = "records/corrected_synth.wav"
+
+    # _____________________________________________________________________________
+
+    # prepare a full scale for plotting
+    fs_s, data_s, N_s, secs_s, Ts_s, t_s = read_wav("records/scales/full_scale.wav") # scale frequencies generator
+    FFT_scale, FFT_side_scale, freqs_scale, freqs_side_scale = FFT_quarter(data_s, N_s, t_s)  # scale frequencies generator
+
+
+    # visualize input data
+    print("Visualizing input...")
+    fs, data, N, secs, Ts, t = read_wav(input_filename)
     FFT, FFT_side, freqs, freqs_side = FFT_quarter(data, N, t)
+    draw(t, data, FFT, FFT_side, freqs, freqs_side, freqs_side_scale, FFT_side_scale)
+    print()
 
-    samples = abs(FFT_side).shape
-    samples = str(samples)
-    samples = samples[1:-2]
-    samples = int(samples)
-    # print(samples)
-    freq_of_notes = frequency_table(samples)
 
-    draw(t, data, FFT, FFT_side, freqs, freqs_side, freq_of_notes)
+    # auto-tune
+    y, sr = librosa.load(input_filename)
+
+    chosen_scale = scales.C_Major_pentatonic
+    scale_dict = scales.fit_frequencies(chosen_scale)
+
+    scale = [scale_dict[note] for note in scale_dict]
+    scale.sort()
+    print("_______Chosen scale_______")
+    print(scale)
+
+    corrected_y = autotune.correct(y, sr, scale)
+    autotune.save_wav(output_filename, corrected_y, sr)
+    print()
+
+
+    # visualize output data
+    print("Visualizing output...")
+    fs, data, N, secs, Ts, t = read_wav(output_filename)
+    FFT, FFT_side, freqs, freqs_side = FFT_quarter(data, N, t)
+    draw(t, data, FFT, FFT_side, freqs, freqs_side, freqs_side_scale, FFT_side_scale)
+
 
 if __name__ == "__main__":
     main()
-# how to generate audio from numpy array:
-# https://stackoverflow.com/questions/10357992/how-to-generate-audio-from-a-numpy-array

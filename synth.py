@@ -27,6 +27,30 @@ chord = [170.000,  329.628, 570.000]
 wave = synthesizer.generate_chord(chord, 3.0)
 writer.write_wave("output_records/synth.wav", wave)
 
-chord = [170.000,  329.628, 570.000]
-wave = synthesizer.generate_chord(chord, 3.0)
-writer.write_wave("output_records/synth.wav", wave)
+# # generate the sound of a full scale of notes
+# scale_dict = scales.fit_frequencies(scales.full_scale)
+# scale = [scale_dict[note] for note in scale_dict]
+# scale.sort()
+# wave = synthesizer.generate_chord(scale, 3.0)
+# writer.write_wave("records/scales/full_scale.wav", wave)
+
+# # generate the sound for C major pentatonic
+# scale_dict = scales.fit_frequencies(scales.C_Major_pentatonic)
+# scale = [scale_dict[note] for note in scale_dict]
+# scale.sort()
+# wave = synthesizer.generate_chord(scale, 3.0)
+# writer.write_wave("records/scales/C_major.wav", wave)
+
+# # generate the sound for D major pentatonic
+# scale_dict = scales.fit_frequencies(scales.D_Major_pentatonic)
+# scale = [scale_dict[note] for note in scale_dict]
+# scale.sort()
+# wave = synthesizer.generate_chord(scale, 3.0)
+# writer.write_wave("records/scales/D_major.wav", wave)
+
+# # generate the sound for E major pentatonic
+# scale_dict = scales.fit_frequencies(scales.E_Major_pentatonic)
+# scale = [scale_dict[note] for note in scale_dict]
+# scale.sort()
+# wave = synthesizer.generate_chord(scale, 3.0)
+# writer.write_wave("records/scales/E_major.wav", wave)

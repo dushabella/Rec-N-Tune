@@ -14,7 +14,7 @@ def play_wav(file_name: str) ->None:
     play(sound)
 
 def main():
-    play_wav('input_records/Iza9_total_fail.wav')
+    play_wav('song_records/Iza9_total_fail.wav')
 
 if __name__ == "__main__":
     main()

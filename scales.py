@@ -69,7 +69,6 @@ def __generate_freq_table() ->Dict:
         print()
         i += 1
     # notes = sorted(notes.items(), key=lambda x: x[1])
-    # print(sorted(notes.items(), key=lambda x: x[1]))
     # print(notes)
     return(notes)
 
